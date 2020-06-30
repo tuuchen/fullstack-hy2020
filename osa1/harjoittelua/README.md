@@ -1,5 +1,3 @@
-osan 2 puhelinluetteloa käsittelevän tehtäväsarjan react-koodi tähän hakemistoon
-
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

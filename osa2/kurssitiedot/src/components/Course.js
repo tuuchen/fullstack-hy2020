@@ -14,31 +14,27 @@ const Part = ({ name, exercises }) => (
   </>
 );
 
-const Content = ({ parts }) => {
-  return (
-    <>
-      {parts.map((val) => (
-        <Part key={val.id} name={val.name} exercises={val.exercises} />
-      ))}
-    </>
-  );
-};
-
-const Total = ({ parts }) => (
-  <p>
-    Number of excercises:{" "}
-    {parts.reduce((sum, val) => (sum += val.exercises), 0)}
-  </p>
+const Content = ({ parts }) => (
+  <>
+    {parts.map((val) => (
+      <Part key={val.id} name={val.name} exercises={val.exercises} />
+    ))}
+  </>
 );
 
-const Course = ({ course }) => {
-  return (
-    <div>
-      <Header course={course.name} />
-      <Content parts={course.parts} />
-      <Total parts={course.parts} />
-    </div>
-  );
-};
+const Total = ({ parts }) => (
+  <h3>
+    Number of excercises:{" "}
+    {parts.reduce((sum, val) => (sum += val.exercises), 0)}
+  </h3>
+);
+
+const Course = ({ course }) => (
+  <>
+    <Header course={course.name} />
+    <Content parts={course.parts} />
+    <Total parts={course.parts} />
+  </>
+);
 
 export default Course;
