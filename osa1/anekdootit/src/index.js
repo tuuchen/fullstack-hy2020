@@ -34,22 +34,21 @@ const BestAnecdote = ({ top, anecdote, max }) => {
   );
 };
 
-const App = (props) => {
+const App = ({ anecdotes }) => {
   const [selected, setSelected] = useState(0);
-  const [points, setPoints] = useState(
-    new Array(props.anecdotes.length).fill(0)
-  );
+  const [points, setPoints] = useState(new Array(anecdotes.length).fill(0));
 
   const [top, setTop] = useState(0);
   const [max, setMax] = useState(0);
   const copy = [...points];
 
   useEffect(() => {
-    setSelected(Math.floor(Math.random() * props.anecdotes.length));
+    setSelected(Math.floor(Math.random() * anecdotes.length));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const nextAnecdote = () => {
-    setSelected(Math.floor(Math.random() * props.anecdotes.length));
+    setSelected(Math.floor(Math.random() * anecdotes.length));
   };
 
   const vote = () => {
@@ -64,12 +63,12 @@ const App = (props) => {
   return (
     <div>
       <AnecdoteOfTheDay
-        anecdote={props.anecdotes[selected]}
+        anecdote={anecdotes[selected]}
         points={points[selected]}
       />
       <Button handleClick={vote} text="Give vote" />
       <Button handleClick={nextAnecdote} text="Show next anecdote" />
-      <BestAnecdote top={top} anecdote={props.anecdotes} max={max} />
+      <BestAnecdote top={top} anecdote={anecdotes} max={max} />
     </div>
   );
 };
