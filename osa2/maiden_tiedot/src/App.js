@@ -10,7 +10,7 @@ const App = () => {
   const [filter, setFilter] = useState('');
   const [weather, setWeather] = useState('');
 
-  const api_key = process.env.REACT_APP_API_KEY
+  const api_key = process.env.REACT_APP_API_KEY;
 
   useEffect(() => {
     axios.get('https://restcountries.eu/rest/v2/all').then((res) => {

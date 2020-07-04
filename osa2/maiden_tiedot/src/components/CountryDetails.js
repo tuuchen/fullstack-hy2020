@@ -2,6 +2,7 @@ import React from 'react';
 
 const CountryDetails = ({ country, weather }) => {
   if (country.length === 1) {
+    console.log(weather);
     return (
       <>
         <h2>{country[0].name}</h2>
@@ -14,7 +15,17 @@ const CountryDetails = ({ country, weather }) => {
           ))}
         </ul>
         <img src={country[0].flag} alt='flag' width='200' height='150' />
-        {weather && <p>Temp: {weather.main.temp}</p>}
+        {weather && (
+          <>
+            <h3>Weather in {weather.name}</h3>
+            <p>Temperature {weather.main.temp}c</p>
+            <img
+              src={`http://openweathermap.org/img/w/${weather.weather[0].icon}.png`}
+              alt='icon'
+            />
+            <p>Wind speed {weather.wind.speed}m/s, direction {weather.wind.deg} (deg)</p>
+          </>
+        )}
       </>
     );
   }
