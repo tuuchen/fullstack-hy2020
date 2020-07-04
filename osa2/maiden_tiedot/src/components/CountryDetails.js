@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const CountryDetails = ({ country, weather }) => {
   if (country.length === 1) {
@@ -13,7 +13,7 @@ const CountryDetails = ({ country, weather }) => {
             <li key={i}>{language.name}</li>
           ))}
         </ul>
-        <img src={country[0].flag} alt="flag" width="200" height="150" />
+        <img src={country[0].flag} alt='flag' width='200' height='150' />
         {weather && <p>Temp: {weather.main.temp}</p>}
       </>
     );

@@ -1,27 +1,22 @@
-import React, { useState, useEffect } from "react";
-import Search from "./components/Search";
-import Countries from "./components/Countries";
-import CountryDetails from "./components/CountryDetails";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import Search from './components/Search';
+import Countries from './components/Countries';
+import CountryDetails from './components/CountryDetails';
+import axios from 'axios';
 
 const App = () => {
   const [countries, setCountries] = useState([]);
   const [countryToShow, setCountryToShow] = useState(countries);
-  const [filter, setFilter] = useState("");
-  const [weather, setWeather] = useState("");
+  const [filter, setFilter] = useState('');
+  const [weather, setWeather] = useState('');
 
-  const api_key = "9f4d67fc449f30b9c2a33a138be6b54e";
+  const api_key = process.env.REACT_APP_API_KEY
 
   useEffect(() => {
-    axios.get("https://restcountries.eu/rest/v2/all").then((res) => {
+    axios.get('https://restcountries.eu/rest/v2/all').then((res) => {
       setCountries(res.data);
     });
   }, []);
-
-  useEffect(() => {
-    getWeather(countryToShow);
-    // eslint-disable-next-line
-  }, [countryToShow]);
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -29,6 +24,7 @@ const App = () => {
       const countryArr = countries.filter((country) =>
         country.name.toLowerCase().includes(e.target.value.toLowerCase())
       );
+      getWeather(countryArr);
       setCountryToShow(countryArr);
     } else {
       setCountryToShow([]);
@@ -42,13 +38,14 @@ const App = () => {
 
   const getWeather = (city) => {
     if (city.length === 1 && weather.name !== city[0].capital) {
-      setWeather("");
+      setWeather('');
       axios
         .get(
-          "https://api.openweathermap.org/data/2.5/weather?q=" +
+          'https://api.openweathermap.org/data/2.5/weather?q=' +
             city[0].capital +
-            "&appid=" +
-            api_key
+            '&appid=' +
+            api_key +
+            '&units=metric'
         )
         .then((response) => {
           setWeather(response.data);
