@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const Countries = ({ countries, handleShow }) => {
   if (countries.length > 1 && countries.length <= 10) {
@@ -7,8 +7,8 @@ const Countries = ({ countries, handleShow }) => {
         {countries.map((country) => {
           return (
             <div key={country.name}>
-              {country.name}{' '}
-              <button key={country.name} onClick={handleShow(country)}>
+              {country.name}{" "}
+              <button key={country.name} onClick={handleShow([country])}>
                 show
               </button>
             </div>

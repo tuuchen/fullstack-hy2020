@@ -1,51 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import Search from './components/Search';
-import Countries from './components/Countries';
-import CountryDetails from './components/CountryDetails';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import Search from "./components/Search";
+import Countries from "./components/Countries";
+import CountryDetails from "./components/CountryDetails";
+import axios from "axios";
 
 const App = () => {
   const [countries, setCountries] = useState([]);
   const [countryToShow, setCountryToShow] = useState(countries);
-  const [filter, setFilter] = useState('');
-  const [weather, setWeather] = useState('');
+  const [filter, setFilter] = useState("");
+  const [weather, setWeather] = useState("");
 
-  const api_key = '9f4d67fc449f30b9c2a33a138be6b54e';
+  const api_key = "9f4d67fc449f30b9c2a33a138be6b54e";
 
   useEffect(() => {
-    axios.get('https://restcountries.eu/rest/v2/all').then((res) => {
+    axios.get("https://restcountries.eu/rest/v2/all").then((res) => {
       setCountries(res.data);
     });
   }, []);
 
+  useEffect(() => {
+    getWeather(countryToShow);
+    // eslint-disable-next-line
+  }, [countryToShow]);
+
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
     if (e.target.value) {
-      setCountryToShow(
-        countries.filter((country) =>
-          country.name.toLowerCase().includes(e.target.value.toLowerCase())
-        )
+      const countryArr = countries.filter((country) =>
+        country.name.toLowerCase().includes(e.target.value.toLowerCase())
       );
-      if (countryToShow[0]) {
-        getWeather(countryToShow[0]);
-      }
+      setCountryToShow(countryArr);
     } else {
       setCountryToShow([]);
     }
   };
 
   const handleShow = (country) => (e) => {
-    getWeather(country.capital);
-    setCountryToShow([country]);
+    getWeather(country);
+    setCountryToShow(country);
   };
 
   const getWeather = (city) => {
-    if (weather.name !== city.capital) {
+    if (city.length === 1 && weather.name !== city[0].capital) {
+      setWeather("");
       axios
         .get(
-          'https://api.openweathermap.org/data/2.5/weather?q=' +
-            city.capital +
-            '&appid=' +
+          "https://api.openweathermap.org/data/2.5/weather?q=" +
+            city[0].capital +
+            "&appid=" +
             api_key
         )
         .then((response) => {
