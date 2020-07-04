@@ -1,5 +1,3 @@
-osan 2 tehtävien 2.12-2.14 react-koodi tähän hakemistoon
-
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
