@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Countries = ({ countries, handleShow }) => {
+const CountryList = ({ countries, handleShow }) => {
   if (countries.length > 1 && countries.length <= 10) {
     return (
       <>
@@ -22,4 +22,4 @@ const Countries = ({ countries, handleShow }) => {
   return null;
 };
 
-export default Countries;
+export default CountryList;

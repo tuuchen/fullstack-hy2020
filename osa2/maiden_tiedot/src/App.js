@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Search from './components/Search';
-import Countries from './components/Countries';
+import CountryList from './components/CountryList';
 import CountryDetails from './components/CountryDetails';
 import axios from 'axios';
 
@@ -21,11 +21,11 @@ const App = () => {
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
     if (e.target.value) {
-      const countryArr = countries.filter((country) =>
+      const filteredCountries = countries.filter((country) =>
         country.name.toLowerCase().includes(e.target.value.toLowerCase())
       );
-      getWeather(countryArr);
-      setCountryToShow(countryArr);
+      getWeather(filteredCountries);
+      setCountryToShow(filteredCountries);
     } else {
       setCountryToShow([]);
     }
@@ -56,7 +56,7 @@ const App = () => {
   return (
     <div>
       <Search filterName={filter} handleFilterChange={handleFilterChange} />
-      <Countries countries={countryToShow} handleShow={handleShow} />
+      <CountryList countries={countryToShow} handleShow={handleShow} />
       <CountryDetails country={countryToShow} weather={weather} />
     </div>
   );
