@@ -2,7 +2,7 @@ import React from 'react';
 import Weather from './Weather';
 import Country from './Country';
 
-const CountryDetails = ({ country, weather }) => {
+const Results = ({ country, weather }) => {
   if (country.length === 1 && weather) {
     return (
       <>
@@ -14,4 +14,4 @@ const CountryDetails = ({ country, weather }) => {
   return null;
 };
 
-export default CountryDetails;
+export default Results;

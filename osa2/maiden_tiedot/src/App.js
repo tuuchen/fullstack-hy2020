@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Search from './components/Search';
 import CountryList from './components/CountryList';
-import CountryDetails from './components/CountryDetails';
+import Results from './components/Results';
 import axios from 'axios';
 
 const App = () => {
@@ -57,7 +57,7 @@ const App = () => {
     <div>
       <Search filterName={filter} handleFilterChange={handleFilterChange} />
       <CountryList countries={countryToShow} handleShow={handleShow} />
-      <CountryDetails country={countryToShow} weather={weather} />
+      <Results country={countryToShow} weather={weather} />
     </div>
   );
 };
