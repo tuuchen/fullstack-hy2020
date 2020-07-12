@@ -1,24 +1,61 @@
-import React, { useState } from "react";
-import Note from "./components/Note";
+import React, { useState, useEffect } from 'react';
+import Note from './components/Note';
+import noteService from './services/notes';
 
-const App = (props) => {
-  const [notes, setNotes] = useState(props.notes);
-  const [newNote, setNewNote] = useState("a new note...");
+const App = () => {
+  const [notes, setNotes] = useState([]);
+  const [newNote, setNewNote] = useState('');
   const [showAll, setShowAll] = useState(true);
+
+  useEffect(() => {
+    console.log('effect');
+    noteService.getAll().then((initialNotes) => {
+      console.log('promise fulfilled');
+      setNotes(initialNotes);
+    });
+  }, []);
 
   const addNote = (event) => {
     event.preventDefault();
-    console.log("button clicked", event.target[0].value);
+    console.log('button clicked', event.target[0].value);
 
     const noteObject = {
+      id: Date.now(),
       content: newNote,
       date: new Date().toISOString(),
       important: Math.random() > 0.5,
-      id: Date.now(),
     };
 
+    noteService.create(noteObject).then((returnedNote) => {
+      setNotes(notes.concat(returnedNote));
+      setNewNote('');
+    });
+
+    /* Offline
+    
     setNotes(notes.concat(noteObject));
-    setNewNote("a new note...");
+    setNewNote('a new note...');
+    
+    */
+  };
+
+  const toggleImportanceOf = (id) => {
+    console.log(`importance of ${id} needs to be toggled`);
+    const note = notes.find((n) => n.id === id);
+    const changedNote = { ...note, important: !note.important };
+    noteService
+      .update(id, changedNote)
+      .then((returnedNote) => {
+        setNotes(notes.map((note) => (note.id !== id ? note : returnedNote)));
+      })
+      // Error handling
+      .catch((error) => {
+        alert(
+          error,
+          `the note '${note.content}' was already deleted from server`
+        );
+        setNotes(notes.filter((n) => n.id !== id));
+      });
   };
 
   const handleNoteChange = (event) => {
@@ -34,12 +71,16 @@ const App = (props) => {
       <h1>Notes</h1>
       <div>
         <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? "important" : "all"}
+          show {showAll ? 'important' : 'all'}
         </button>
       </div>
       <ul>
         {notesToShow.map((note) => (
-          <Note key={note.id} note={note} />
+          <Note
+            key={note.id}
+            note={note}
+            toggleImportance={() => toggleImportanceOf(note.id)}
+          />
         ))}
       </ul>
       <form onSubmit={addNote}>
@@ -51,19 +92,3 @@ const App = (props) => {
 };
 
 export default App;
-
-/* notes.filter(note => note.important)
-
- const result = notes.map((note) => note.id);
-     const result = notes.map((note) => {
-      return note.id;
-    });
-    console.log(result); */
-
-/* handleSubmit = (event) => {
-      event.preventDefault();
-      console.log(event.target.elements.username.value) // from elements property
-      console.log(event.target.username.value) // or directly
-    }
-    
-    <input type="text" name="username"/> */
