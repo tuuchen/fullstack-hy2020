@@ -3,6 +3,7 @@ import Filter from './components/Filter';
 import Header from './components/Header';
 import PersonForm from './components/PersonForm';
 import Persons from './components/Persons';
+import Notification from './components/Notification';
 import PersonService from './services/PersonService';
 
 const App = () => {
@@ -11,11 +12,13 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('');
   const [filterName, setFilterName] = useState('');
   const [namesToShow, setNamesToShow] = useState(persons);
+  const [message, setMessage] = useState('');
+  const [messageClass, setMessageClass] = useState('');
+  const [timeoutCounter, setTimeoutCounter] = useState('');
 
   useEffect(() => {
     PersonService.getAll().then((response) => {
-      setPersons(response);
-      setNamesToShow(response);
+      updatePersons(response);
     });
   }, []);
 
@@ -29,39 +32,42 @@ const App = () => {
 
     const NameExists = persons.some((person) => person.name === newName);
 
-    if (
-      NameExists &&
-      window.confirm(`${newName} already exists, update phone number?`)
-    ) {
-      const indexOfnewName = persons.findIndex((i) => i.name === newName);
-      PersonService.update(indexOfnewName + 1, personObject)
+    if (!newName) return;
+
+    if (!NameExists) {
+      PersonService.create(personObject)
         .then((response) => {
-          console.log('Success!', `updated ${response.name}`);
-          const updatedPerson = persons.map((person) => {
-            console.log(persons[indexOfnewName].name);
-            return person.id !== persons[indexOfnewName].id ? person : response;
-          });
-          setPersons(updatedPerson);
-          setNamesToShow(updatedPerson);
-          setNewName('');
-          setNewNumber('');
+          notificationMessage(
+            `${response.name} added to phonebook!`,
+            'success'
+          );
+          updatePersons(persons.concat(response));
+          clearNewPerson();
         })
         .catch((error) => {
           console.log('Failure! ', error);
         });
-    } else if (NameExists) {
       return;
-    } else {
-      PersonService.create(personObject)
+    }
+
+    if (window.confirm(`${newName} already exists, update phone number?`)) {
+      const indexOfnewName = persons.findIndex((i) => i.name === newName);
+      PersonService.update(indexOfnewName + 1, personObject)
         .then((response) => {
-          console.log('Success!', `${response.name} added to phonebook!`);
-          setPersons(persons.concat(response));
-          setNamesToShow(persons.concat(response));
-          setNewName('');
-          setNewNumber('');
+          notificationMessage(`Updated ${response.name}!`, 'success');
+          const updatedPerson = persons.map((person) => {
+            console.log(persons[indexOfnewName].name);
+            return person.id !== persons[indexOfnewName].id ? person : response;
+          });
+          updatePersons(updatedPerson);
+          clearNewPerson();
         })
         .catch((error) => {
-          console.log(error, 'Entry not saved into phonebook!');
+          console.log('Failure! ', error);
+          notificationMessage(
+            `Failure! ${error}. (Person is already removed from server!)`,
+            'error'
+          );
         });
     }
   };
@@ -85,19 +91,44 @@ const App = () => {
 
   const handlePersonRemove = (id, name) => (e) => {
     if (window.confirm(`Delete ${name}?`)) {
-      PersonService.remove(id).then(() => {
-        console.log('Removed', name);
-        setPersons(persons.filter((n) => n.id !== id));
-        setNamesToShow(persons.filter((n) => n.id !== id));
-        setNewName('');
-        setNewNumber('');
-      });
+      PersonService.remove(id)
+        .then(() => {
+          console.log(`Removed ${name}`);
+          notificationMessage(`Removed ${name}`, 'success');
+          updatePersons(persons.filter((n) => n.id !== id));
+          clearNewPerson();
+        })
+        .catch((error) => {
+          console.log('Failure! ', error);
+        });
     }
+  };
+
+  const notificationMessage = (message, className) => {
+    const timer = setTimeout(() => {
+      setMessageClass(null);
+      setMessage(null);
+    }, 5000);
+    clearTimeout(timeoutCounter);
+    setTimeoutCounter(timer);
+    setMessageClass(className);
+    setMessage(message);
+  };
+
+  const updatePersons = (val) => {
+    setPersons(val);
+    setNamesToShow(val);
+  };
+
+  const clearNewPerson = () => {
+    setNewName('');
+    setNewNumber('');
   };
 
   return (
     <div>
       <Header header="Phonebook" />
+      <Notification className={messageClass} message={message} />
       <Filter filterName={filterName} handleFilterChange={handleFilterChange} />
       <PersonForm
         addPerson={addPerson}
