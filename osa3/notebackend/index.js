@@ -1,8 +1,11 @@
 const express = require('express');
 const { response } = require('express');
+const cors = require('cors')
 const app = express();
 
+app.use(cors())
 app.use(express.json());
+app.use(express.static('build'))
 
 let notes = [
   {
@@ -25,7 +28,7 @@ let notes = [
   },
   {
     id: 4,
-    content: 'VS Cpde REST client is pretty good',
+    content: 'VS Code REST client is pretty good',
     date: new Date(),
     important: true,
   },
@@ -67,7 +70,7 @@ app.post('/api/notes', (req, res) => {
   };
 
   notes = notes.concat(note);
-  response.json(note);
+  res.json(note);
 });
 
 app.delete('/api/notes/:id', (req, res) => {
@@ -76,7 +79,7 @@ app.delete('/api/notes/:id', (req, res) => {
   res.status(204).end();
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

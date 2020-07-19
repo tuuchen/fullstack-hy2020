@@ -18,6 +18,7 @@ const App = () => {
 
   useEffect(() => {
     PersonService.getAll().then((response) => {
+      console.log(response);
       updatePersons(response);
     });
   }, []);
@@ -41,6 +42,7 @@ const App = () => {
             `${response.name} added to phonebook!`,
             'success'
           );
+          console.log(response);
           updatePersons(persons.concat(response));
           clearNewPerson();
         })
