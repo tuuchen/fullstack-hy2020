@@ -17,13 +17,17 @@ const App = () => {
   const [timeoutCounter, setTimeoutCounter] = useState('');
 
   useEffect(() => {
-    PersonService.getAll().then((response) => {
-      console.log(response);
-      updatePersons(response);
-    });
+    getInitialPersons();
+    // eslint-disable-next-line
   }, []);
 
-  const addPerson = (e) => {
+  const getInitialPersons = async () => {
+    const initialPersons = await PersonService.getAll();
+    console.log(initialPersons);
+    updatePersons(initialPersons);
+  };
+
+  const addPerson = async (e) => {
     e.preventDefault();
 
     const personObject = {
@@ -36,38 +40,36 @@ const App = () => {
     if (!newName) return;
 
     if (!NameExists) {
-      PersonService.create(personObject)
-        .then((response) => {
-          notificationMessage(
-            `${response.name} added to phonebook!`,
-            'success'
-          );
-          console.log(response);
-          updatePersons(persons.concat(response));
-          clearNewPerson();
-        })
-        .catch((error) => {
-          console.log('Failure! ', error);
-        });
+      try {
+        const newPerson = await PersonService.create(personObject);
+        console.log(newPerson);
+        notificationMessage(`${newPerson.name} added to phonebook!`, 'success');
+        updatePersons(persons.concat(newPerson));
+        clearNewPerson();
+      } catch (err) {
+        console.log('Failure! ', err);
+      }
       return;
     }
 
     if (window.confirm(`${newName} already exists, update phone number?`)) {
       const indexOfnewName = persons.findIndex((i) => i.name === newName);
       const personId = persons[indexOfnewName].id;
-      PersonService.update(personId, personObject)
-        .then((response) => {
-          notificationMessage(`Updated ${response.name}!`, 'success');
-          const updatedPerson = persons.map((person) =>
-            person.id !== personId ? person : response
-          );
-          updatePersons(updatedPerson);
-          clearNewPerson();
-        })
-        .catch((error) => {
-          console.log('Failure! ', error);
-          notificationMessage(`Failure! ${error}.`, 'error');
-        });
+      try {
+        const updatePerson = await PersonService.update(personId, personObject);
+        notificationMessage(`Updated ${updatePerson.name}!`, 'success');
+        const updatedPerson = persons.map((person) =>
+          person.id !== personId ? person : updatePerson
+        );
+        updatePersons(updatedPerson);
+        clearNewPerson();
+      } catch (err) {
+        console.log('Failure! ', err);
+        notificationMessage(
+          `Failure! ${err}. (Person is already removed from server!)`,
+          'error'
+        );
+      }
     }
   };
 
@@ -88,18 +90,17 @@ const App = () => {
     );
   };
 
-  const handlePersonRemove = (id, name) => (e) => {
+  const handlePersonRemove = (id, name) => async (e) => {
     if (window.confirm(`Delete ${name}?`)) {
-      PersonService.remove(id)
-        .then(() => {
-          console.log(`Removed ${name}`);
-          notificationMessage(`Removed ${name}`, 'success');
-          updatePersons(persons.filter((n) => n.id !== id));
-          clearNewPerson();
-        })
-        .catch((error) => {
-          console.log('Failure! ', error);
-        });
+      try {
+        await PersonService.remove(id);
+        console.log(`Removed ${name}`);
+        notificationMessage(`Removed ${name}`, 'success');
+        updatePersons(persons.filter((n) => n.id !== id));
+        clearNewPerson();
+      } catch (err) {
+        console.log('Failure! ', err);
+      }
     }
   };
 

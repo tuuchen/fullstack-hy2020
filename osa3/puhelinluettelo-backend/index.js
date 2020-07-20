@@ -103,6 +103,23 @@ app.post('/api/persons', async (req, res, next) => {
 });
 
 // Async!
+app.put('/api/persons/:id', async (req, res, next) => {
+  const body = req.body;
+  const person = {
+    name: body.name,
+    number: body.number,
+  };
+  try {
+    const updatedPerson = await Person.findByIdAndUpdate(
+      req.params.id,
+      person, { new: true });
+    res.json(updatedPerson);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Async!
 app.delete('/api/persons/:id', async (req, res, next) => {
   try {
     const findAndDelete = await Person.findByIdAndDelete(req.params.id);

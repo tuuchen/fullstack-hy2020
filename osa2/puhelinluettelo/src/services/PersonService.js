@@ -8,8 +8,9 @@ import axios from 'axios';
 // URL for local backend
 // const baseUrl = 'http://localhost:3001/api/persons';
 
-/* Deployed */ 
-const baseUrl = '/api/persons'
+/* Deployed */
+
+const baseUrl = '/api/persons';
 
 const getAll = () => {
   const request = axios.get(baseUrl);
