@@ -9,7 +9,7 @@ const Persons = ({ namesToShow, deletePerson }) => {
         {namesToShow.map((person) => {
           if (!person.number) person.number = '(no number)';
           return (
-            <p key={person.name}>
+            <p key={person.id}>
               {person.name}, {person.number}{' '}
               <Button
                 handleClick={deletePerson(person.id, person.name)}

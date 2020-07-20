@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const { response } = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const app = express();
@@ -89,15 +88,10 @@ app.post('/api/persons', async (req, res, next) => {
   });
 
   try {
-    const personExists = await Person.exists({ name: body.name });
-    if (personExists) {
-      return res.status(400).json({
-        error: 'Name already exists in phonebook. Name must be unique.',
-      });
-    }
     const savedPerson = await person.save();
     res.json(savedPerson);
   } catch (err) {
+    console.log(err);
     next(err);
   }
 });
@@ -112,7 +106,9 @@ app.put('/api/persons/:id', async (req, res, next) => {
   try {
     const updatedPerson = await Person.findByIdAndUpdate(
       req.params.id,
-      person, { new: true });
+      person,
+      { new: true, runValidators: true, context: 'query' }
+    );
     res.json(updatedPerson);
   } catch (err) {
     next(err);
@@ -146,6 +142,9 @@ const errorHandler = (err, req, res, next) => {
 
   if (err.name === 'CastError') {
     return res.status(400).send({ error: 'malformatted id' });
+  } else if (err.name === 'ValidationError') {
+    res.statusMessage = 'Validation error';
+    return res.status(400).json({ error: err.message });
   }
 
   next(err);

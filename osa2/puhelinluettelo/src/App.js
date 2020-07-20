@@ -47,7 +47,8 @@ const App = () => {
           clearNewPerson();
         })
         .catch((error) => {
-          console.log('Failure! ', error);
+          console.log('Failure! ', error.response);
+          notificationMessage(error.response.data.error, 'error');
         });
       return;
     }
@@ -65,8 +66,8 @@ const App = () => {
           clearNewPerson();
         })
         .catch((error) => {
-          console.log('Failure! ', error);
-          notificationMessage(`Failure! ${error}.`, 'error');
+          console.log('Failure! ', error.response);
+          notificationMessage(error.response.data.error, 'error');
         });
     }
   };
@@ -107,7 +108,7 @@ const App = () => {
     const timer = setTimeout(() => {
       setMessageClass(null);
       setMessage(null);
-    }, 5000);
+    }, 8000);
     clearTimeout(timeoutCounter);
     setTimeoutCounter(timer);
     setMessageClass(className);

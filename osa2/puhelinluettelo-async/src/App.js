@@ -47,7 +47,8 @@ const App = () => {
         updatePersons(persons.concat(newPerson));
         clearNewPerson();
       } catch (err) {
-        console.log('Failure! ', err);
+        console.log('Failure! ', err.response);
+        notificationMessage(err.response.data.error, 'error');
       }
       return;
     }
@@ -64,11 +65,8 @@ const App = () => {
         updatePersons(updatedPerson);
         clearNewPerson();
       } catch (err) {
-        console.log('Failure! ', err);
-        notificationMessage(
-          `Failure! ${err}. (Person is already removed from server!)`,
-          'error'
-        );
+        console.log('Failure! ', err.response);
+        notificationMessage(err.response.data.error, 'error');
       }
     }
   };
@@ -108,7 +106,7 @@ const App = () => {
     const timer = setTimeout(() => {
       setMessageClass(null);
       setMessage(null);
-    }, 5000);
+    }, 8000);
     clearTimeout(timeoutCounter);
     setTimeoutCounter(timer);
     setMessageClass(className);

@@ -22,6 +22,8 @@ const App = () => {
     event.preventDefault();
     console.log('button clicked', event.target[0].value);
 
+    if (!newNote) return;
+
     const noteObject = {
       id: Date.now(),
       content: newNote,
@@ -29,10 +31,18 @@ const App = () => {
       important: Math.random() > 0.5,
     };
 
-    noteService.create(noteObject).then((returnedNote) => {
-      setNotes(notes.concat(returnedNote));
-      setNewNote('');
-    });
+    noteService
+      .create(noteObject)
+      .then((returnedNote) => {
+        setNotes(notes.concat(returnedNote));
+        setNewNote('');
+      })
+      .catch((error) => {
+        setErrorMessage(error.message);
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);
+      });
   };
 
   const toggleImportanceOf = (id) => {
@@ -44,7 +54,6 @@ const App = () => {
       .then((returnedNote) => {
         setNotes(notes.map((note) => (note.id !== id ? note : returnedNote)));
       })
-      // Error handling
       .catch((error) => {
         setErrorMessage(
           error,
