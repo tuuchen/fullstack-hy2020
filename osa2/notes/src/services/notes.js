@@ -1,16 +1,16 @@
 import axios from 'axios';
 
-// URL for json-server
+// URL for json server
 // const baseUrl = 'http://localhost:3001/notes';
 
 // URL for local backend
-// const baseUrl = 'http://localhost:3001/api/notes';
+const baseUrl = 'http://localhost:3001/api/notes';
 
 // URL for heroku 
 // const baseUrl = 'http://fs-notebackend.herokuapp.com/api/notes'
 
 // URL for serving frontend via backend
-const baseUrl = '/api/notes'
+// const baseUrl = '/api/notes'
 
 const getAll = () => {
   const request = axios.get(baseUrl);

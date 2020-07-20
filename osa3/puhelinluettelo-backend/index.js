@@ -1,12 +1,14 @@
+require('dotenv').config();
 const express = require('express');
 const { response } = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const app = express();
+const Person = require('./models/person');
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('build'))
+app.use(express.static('build'));
 
 morgan.token('body', (req, res) => {
   return JSON.stringify(req.body);
@@ -27,93 +29,114 @@ app.use(
   })
 );
 
-const requestLogger = (request, response, next) => {
-  console.log('Method:', request.method);
-  console.log('Path:  ', request.path);
-  console.log('Body:  ', request.body);
+const requestLogger = (req, res, next) => {
+  console.log('Method:', req.method);
+  console.log('Path:  ', req.path);
+  console.log('Body:  ', req.body);
   console.log('---');
   next();
 };
 
 app.use(requestLogger);
 
-const generateId = () => {
-  return Math.round(Date.now() + Math.random());
-};
-
-// Phonebook
-const phonebook = {
-  persons: [
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 },
-  ],
-};
-
-app.get('/info', (req, res) => {
-  const numOfPersons = phonebook.persons.length;
-  const date = new Date();
-  res.send(
-    `<p>Phonebook has info for ${numOfPersons} people</p><p>${date}</p>`
-  );
+// Async!
+app.get('/info', async (req, res, next) => {
+  try {
+    const persons = await Person.find({});
+    const numOfPersons = persons.length;
+    const date = new Date();
+    res.send(
+      `<p>Phonebook has info for ${numOfPersons} people</p><p>${date}</p>`
+    );
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.get('/api/persons', (req, res) => {
-  res.json(phonebook.persons);
+// Async!
+app.get('/api/persons', async (req, res, next) => {
+  try {
+    const persons = await Person.find({});
+    res.json(persons);
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.get('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const person = phonebook.persons.find((n) => n.id === id);
-  person ? res.json(person) : res.status(404).end();
+// Async!
+app.get('/api/persons/:id', async (req, res, next) => {
+  try {
+    const result = await Person.findById(req.params.id);
+    result ? res.json(result) : res.status(404).end();
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.post('/api/persons', (req, res) => {
+// Async!
+app.post('/api/persons', async (req, res, next) => {
   const body = req.body;
 
   if (!body.name || !body.number) {
-    return response.status(400).json({
+    return res.status(400).json({
       error: 'Content missing',
     });
   }
 
-  const person = {
+  const person = new Person({
     name: body.name,
     number: body.number,
-    id: generateId(),
-  };
+  });
 
-  const match = phonebook.persons.find((n) => n.name === body.name);
-  if (match) {
-    return res.status(400).json({
-      error: 'Name already exists in phonebook. Name must be unique.',
-    });
+  try {
+    const personExists = await Person.exists({ name: body.name });
+    if (personExists) {
+      return res.status(400).json({
+        error: 'Name already exists in phonebook. Name must be unique.',
+      });
+    }
+    const savedPerson = await person.save();
+    res.json(savedPerson);
+  } catch (err) {
+    next(err);
   }
-  phonebook.persons.push(person);
-  res.json(person);
 });
 
-app.delete('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const match = phonebook.persons.find((n) => n.id === id);
-  if (!match) {
-    return res.status(400).json({
-      error: 'ID not found!',
-    });
+// Async!
+app.delete('/api/persons/:id', async (req, res, next) => {
+  try {
+    const findAndDelete = await Person.findByIdAndDelete(req.params.id);
+    if (!findAndDelete) {
+      return res.status(400).json({
+        error: 'ID not found!',
+      });
+    }
+    const persons = await Person.find({});
+    res.json(persons);
+  } catch (err) {
+    next(err);
   }
-  const person = phonebook.persons.filter((n) => n.id !== id);
-  phonebook.persons = person;
-  res.json(phonebook.persons);
 });
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' });
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: 'unknown endpoint' });
 };
 
 app.use(unknownEndpoint);
 
-const PORT = process.env.PORT || 3001
+const errorHandler = (err, req, res, next) => {
+  console.error(err.message);
+
+  if (err.name === 'CastError') {
+    return res.status(400).send({ error: 'malformatted id' });
+  }
+
+  next(err);
+};
+
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

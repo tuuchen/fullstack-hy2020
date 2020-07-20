@@ -2,7 +2,10 @@ import axios from 'axios';
 
 /* Dev * /
 
-// const baseUrl = 'http://localhost:3002/persons';
+// URL for json server
+// const baseUrl = 'http://localhost:3001/persons';
+
+// URL for local backend
 // const baseUrl = 'http://localhost:3001/api/persons';
 
 /* Deployed */ 
