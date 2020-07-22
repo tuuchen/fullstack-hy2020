@@ -17,8 +17,8 @@ const favouriteBlog = (blogs) => {
 const mostBlogs = (blogs) => {
   if (blogs.length === 0) return 0
 
-  var obj = {}
-  for (var i = 0, j = blogs.length; i < j; i++) {
+  let obj = {}
+  for (let i = 0; i < blogs.length; i++) {
     if (obj[blogs[i].author]) {
       obj[blogs[i].author]++
     } else {
@@ -40,8 +40,8 @@ const mostBlogs = (blogs) => {
 const mostLikes = (blogs) => {
   if (blogs.length === 0) return 0
 
-  var obj = {}
-  for (var i = 0, j = blogs.length; i < j; i++) {
+  let obj = {}
+  for (let i = 0; i < blogs.length; i++) {
     if (obj[blogs[i].author]) {
       obj[blogs[i].author] += blogs[i].likes
     } else {

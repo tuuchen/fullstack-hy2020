@@ -56,7 +56,7 @@ app.get('/info', async (req, res, next) => {
 app.get('/api/persons', async (req, res, next) => {
   try {
     const persons = await Person.find({})
-    res.json(persons)
+    res.json(persons.map((person) => person.toJSON()))
   } catch (err) {
     next(err)
   }
@@ -66,7 +66,7 @@ app.get('/api/persons', async (req, res, next) => {
 app.get('/api/persons/:id', async (req, res, next) => {
   try {
     const result = await Person.findById(req.params.id)
-    result ? res.json(result) : res.status(404).end()
+    result ? res.json(result.toJSON()) : res.status(404).end()
   } catch (err) {
     next(err)
   }
@@ -89,7 +89,7 @@ app.post('/api/persons', async (req, res, next) => {
 
   try {
     const savedPerson = await person.save()
-    res.json(savedPerson)
+    res.json(savedPerson.toJSON())
   } catch (err) {
     console.log(err)
     next(err)
@@ -109,7 +109,7 @@ app.put('/api/persons/:id', async (req, res, next) => {
       person,
       { new: true, runValidators: true, context: 'query' }
     )
-    res.json(updatedPerson)
+    res.json(updatedPerson.toJSON())
   } catch (err) {
     next(err)
   }
@@ -125,7 +125,7 @@ app.delete('/api/persons/:id', async (req, res, next) => {
       })
     }
     const persons = await Person.find({})
-    res.json(persons)
+    res.json(persons.toJSON())
   } catch (err) {
     next(err)
   }

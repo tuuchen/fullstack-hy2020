@@ -20,13 +20,13 @@ app.use(requestLogger)
 
 app.get('/api/notes', (req, res) => {
   Note.find({}).then((notes) => {
-    res.json(notes)
+    res.json(notes.map((note) => note.toJSON()))
   })
 })
 
 app.get('/api/notes/:id', (req, res, next) => {
   Note.findById(req.params.id)
-    .then((note) => (note ? res.json(note) : res.status(404).end()))
+    .then((note) => (note ? res.json(note.toJSON()) : res.status(404).end()))
     .catch((error) => next(error))
 })
 
@@ -48,7 +48,7 @@ app.post('/api/notes', (req, res, next) => {
   note
     .save()
     .then((savedNote) => {
-      res.json(savedNote)
+      res.json(savedNote.toJSON())
     })
     .catch((err) => next(err))
 })
@@ -63,7 +63,7 @@ app.put('/api/notes/:id', (req, res, next) => {
 
   Note.findByIdAndUpdate(req.params.id, note, { new: true })
     .then((updatedNote) => {
-      res.json(updatedNote)
+      res.json(updatedNote.toJSON())
     })
     .catch((error) => next(error))
 })
