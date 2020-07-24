@@ -1,7 +1,8 @@
 POST http://localhost:3001/api/notes
 Content-Type: application/json
+Authorization:
 
 {
-    "content": "VS Cpde REST client is pretty good",
+    "content": "VS Code REST client is pretty good",
     "important": false
 }

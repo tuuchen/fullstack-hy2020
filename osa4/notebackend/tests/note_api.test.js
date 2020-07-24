@@ -91,6 +91,17 @@ describe('when there is initially some notes saved', () => {
 
       const savedUser = await user.save()
 
+      const userWithPassword = {
+        username: user.username,
+        password: 'sekret',
+      }
+
+      const login = await api
+        .post('/api/login')
+        .send(userWithPassword)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
       const newNote = {
         content: 'async/await simplifies making async calls',
         important: true,
@@ -99,6 +110,7 @@ describe('when there is initially some notes saved', () => {
 
       await api
         .post('/api/notes')
+        .set('Authorization', 'bearer ' + login.body.token)
         .send(newNote)
         .expect(200)
         .expect('Content-Type', /application\/json/)
@@ -111,11 +123,33 @@ describe('when there is initially some notes saved', () => {
     })
 
     test('fails with status code 400 if data invalid', async () => {
+      await User.deleteMany({})
+
+      const passwordHash = await bcrypt.hash('sekret', 10)
+      const user = new User({ username: 'root', passwordHash })
+
+      await user.save()
+
+      const userWithPassword = {
+        username: user.username,
+        password: 'sekret',
+      }
+
+      const login = await api
+        .post('/api/login')
+        .send(userWithPassword)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
       const newNote = {
         important: true,
       }
 
-      await api.post('/api/notes').send(newNote).expect(400)
+      await api
+        .post('/api/notes')
+        .set('Authorization', 'bearer ' + login.body.token)
+        .send(newNote)
+        .expect(400)
 
       const notesAtEnd = await helper.notesInDb()
 
