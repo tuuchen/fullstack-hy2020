@@ -1,9 +1,19 @@
 const logger = require('./logger')
 
+const tokenExtractor = (req, res, next) => {
+  const authorization = req.get('authorization')
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    req.token = authorization.substring(7)
+  } else req.token = null
+
+  next()
+}
+
 const requestLogger = (req, res, next) => {
   logger.info('Method:', req.method)
   logger.info('Path:  ', req.path)
   logger.info('Body:  ', req.body)
+  logger.info('Token:  ', req.token)
   logger.info('---')
   next()
 }
@@ -19,9 +29,18 @@ const errorHandler = (err, req, res, next) => {
     return res.status(400).send({ error: 'malformatted id' })
   } else if (err.name === 'ValidationError') {
     return res.status(400).json({ error: err.message })
+  } else if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({
+      err: 'invalid token',
+    })
   }
 
   next(err)
 }
 
-module.exports = { requestLogger, unknownEndpoint, errorHandler }
+module.exports = {
+  requestLogger,
+  unknownEndpoint,
+  errorHandler,
+  tokenExtractor,
+}

@@ -3,11 +3,55 @@ const supertest = require('supertest')
 const helper = require('./test_helper')
 const app = require('../app')
 const api = supertest(app)
+const bcrypt = require('bcrypt')
+
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 beforeEach(async () => {
   await Blog.deleteMany({})
   await Blog.insertMany(helper.blogs)
+  await User.deleteMany({})
+})
+
+describe('Creating new user', () => {
+  test('fails with status code 400 if username is too short', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const user = {
+      username: 'ro',
+      name: 'Superuser',
+      password: 'sekret',
+    }
+
+    const newUser = await api
+      .post('/api/users')
+      .send(user)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+  })
+
+  test('fails with status code 400 if password is too short', async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const user = {
+      username: 'root',
+      name: 'Superuser',
+      password: 'se',
+    }
+
+    const newUser = await api
+      .post('/api/users')
+      .send(user)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+  })
 })
 
 test('blogs are returned as json', async () => {
@@ -44,17 +88,34 @@ test('a specific blog is within the returned blogs', async () => {
 })
 
 test('if no likes are defined, likes will default to 0', async () => {
+  const passwordHash = await bcrypt.hash('sekret', 10)
+  const user = new User({ username: 'root', passwordHash })
+  const savedUser = await user.save()
+
+  const userWithPassword = {
+    username: user.username,
+    password: 'sekret',
+  }
+
+  const login = await api
+    .post('/api/login')
+    .send(userWithPassword)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
   const newBlog = {
     title: 'Go To Statement Considered Harmful',
     author: 'Edsger W. Dijkstra',
     url:
       'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+    userId: savedUser.id,
   }
 
   await api
     .post('/api/blogs')
+    .set('Authorization', 'bearer ' + login.body.token)
     .send(newBlog)
-    .expect(201)
+    .expect(200)
     .expect('Content-Type', /application\/json/)
 
   const blogsAtEnd = await helper.blogsInDb()
@@ -64,11 +125,46 @@ test('if no likes are defined, likes will default to 0', async () => {
 })
 
 test('blog without title or url is not added', async () => {
-  const newBlog = {
-    author: 'Edsger W. Dijkstra',
+  const passwordHash = await bcrypt.hash('sekret', 10)
+  const user = new User({ username: 'root', passwordHash })
+  const savedUser = await user.save()
+
+  const userWithPassword = {
+    username: user.username,
+    password: 'sekret',
   }
 
-  await api.post('/api/blogs').send(newBlog).expect(400)
+  const login = await api
+    .post('/api/login')
+    .send(userWithPassword)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  const newBlog = {
+    author: 'Edsger W. Dijkstra',
+    userId: savedUser.id,
+  }
+
+  await api
+    .post('/api/blogs')
+    .set('Authorization', 'bearer ' + login.body.token)
+    .send(newBlog)
+    .expect(400)
+  const blogsAtEnd = await helper.blogsInDb()
+  expect(blogsAtEnd).toHaveLength(helper.blogs.length)
+})
+
+test('blog without token is not added', async () => {
+  const passwordHash = await bcrypt.hash('sekret', 10)
+  const user = new User({ username: 'root', passwordHash })
+  const savedUser = await user.save()
+
+  const newBlog = {
+    author: 'Edsger W. Dijkstra',
+    userId: savedUser.id,
+  }
+
+  await api.post('/api/blogs').send(newBlog).expect(401)
   const blogsAtEnd = await helper.blogsInDb()
   expect(blogsAtEnd).toHaveLength(helper.blogs.length)
 })
@@ -97,12 +193,42 @@ test('modify a blog', async () => {
 })
 
 test('delete succeeds with status code 204 if id is valid', async () => {
-  const blogsAtStart = await helper.blogsInDb()
-  const blogToDelete = blogsAtStart[0]
+  const passwordHash = await bcrypt.hash('sekret', 10)
+  const user = new User({ username: 'root', passwordHash })
+  const savedUser = await user.save()
 
-  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+  const userWithPassword = {
+    username: user.username,
+    password: 'sekret',
+  }
+
+  const login = await api
+    .post('/api/login')
+    .send(userWithPassword)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  const blogToDelete = {
+    title: 'Vue is awesome',
+    author: 'Tuukka Tihekari',
+    url: 'https://madewithvuejs.com/',
+    likes: 7,
+  }
+
+  const createNewBlog = await api
+    .post('/api/blogs')
+    .set('Authorization', 'bearer ' + login.body.token)
+    .send(blogToDelete)
+
+  const id = createNewBlog.body.id
+
+  await api
+    .delete(`/api/blogs/${id}`)
+    .set('Authorization', 'bearer ' + login.body.token)
+    .expect(204)
+
   const blogsAtEnd = await helper.blogsInDb()
-  expect(blogsAtEnd).toHaveLength(helper.blogs.length - 1)
+  expect(blogsAtEnd).toHaveLength(helper.blogs.length)
 
   const title = blogsAtEnd.map((r) => r.title)
   expect(title).not.toContain(blogToDelete.title)

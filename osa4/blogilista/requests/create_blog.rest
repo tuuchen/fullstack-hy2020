@@ -1,9 +1,10 @@
 POST http://localhost:3001/api/blogs
 Content-Type: application/json
+Authorization:
 
 {
     "title": "Hello world!",
-    "author": "Junior dev",
+    "author": "VS Code REST",
     "url": "www.google.com",
     "likes": 197
 }
