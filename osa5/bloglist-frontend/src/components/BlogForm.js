@@ -4,7 +4,6 @@ const BlogForm = ({
   user,
   addBlog,
   title,
-  author,
   url,
   handleBlogChange,
   handleLogout,
@@ -21,10 +20,6 @@ const BlogForm = ({
       <p>
         Title:
         <input name="Title" value={title} onChange={handleBlogChange} />
-      </p>
-      <p>
-        Author:
-        <input name="Author" value={author} onChange={handleBlogChange} />
       </p>
       <p>
         URL: <input name="URL" value={url} onChange={handleBlogChange} />

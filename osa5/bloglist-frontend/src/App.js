@@ -10,7 +10,6 @@ const App = () => {
   const [blogs, setBlogs] = useState([])
   const [newBlog, setNewBlog] = useState({
     title: '',
-    author: '',
     url: '',
   })
   const [message, setMessage] = useState({
@@ -38,21 +37,18 @@ const App = () => {
 
   const getInitialBlogs = async () => {
     const initialBlogs = await blogService.getAll()
-    console.log(initialBlogs)
     setBlogs(initialBlogs)
   }
 
   const handleLogin = async (event) => {
     event.preventDefault()
 
-    const username = credentials.username
-    const password = credentials.password
+    const newCredentials = {
+      ...credentials,
+    }
 
     try {
-      const user = await loginService.login({
-        username,
-        password,
-      })
+      const user = await loginService.login(newCredentials)
 
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
       blogService.setToken(user.token)
@@ -90,38 +86,27 @@ const App = () => {
 
     e.target.name === 'Username'
       ? setCredentials({
+          ...credentials,
           username: e.target.value,
-          password: credentials.password,
         })
       : setCredentials({
-          username: credentials.username,
+          ...credentials,
           password: e.target.value,
         })
   }
 
   const handleBlogChange = (e) => {
     e.preventDefault()
-    if (e.target.name === 'Title') {
-      setNewBlog({
-        title: e.target.value,
-        author: newBlog.author,
-        url: newBlog.url,
-      })
-    }
-    if (e.target.name === 'Author') {
-      setNewBlog({
-        title: newBlog.title,
-        author: e.target.value,
-        url: newBlog.url,
-      })
-    }
-    if (e.target.name === 'URL') {
-      setNewBlog({
-        title: newBlog.title,
-        author: newBlog.author,
-        url: e.target.value,
-      })
-    }
+
+    e.target.name === 'Title'
+      ? setNewBlog({
+          ...newBlog,
+          title: e.target.value,
+        })
+      : setNewBlog({
+          ...newBlog,
+          url: e.target.value,
+        })
   }
 
   const handleLogout = () => {
@@ -137,12 +122,10 @@ const App = () => {
   const addBlog = async (e) => {
     e.preventDefault()
 
-    if (!newBlog.title || !newBlog.author || !newBlog.url) return
+    if (!newBlog.title || !newBlog.url) return
 
     const blogObject = {
-      title: newBlog.title,
-      author: newBlog.author,
-      url: newBlog.url,
+      ...newBlog,
     }
 
     try {
@@ -150,7 +133,6 @@ const App = () => {
       setBlogs(blogs.concat(returnedBlog))
       setNewBlog({
         title: '',
-        author: '',
         url: '',
       })
       setMessage({
@@ -182,33 +164,10 @@ const App = () => {
       .create(blogObject)
       .then((returnedBlog) => {
         setBlogs(blogs.concat(returnedBlog))
-        setNewBlog({
-          title: '',
-          author: '',
-          url: '',
-        })
-        setMessage({
-          body: `New blog: '${newBlog.title}' added by ${newBlog.author}`,
-          class: 'success',
-        })
-        setTimeout(() => {
-          setMessage({
-            body: null,
-            class: null,
-          })
-        }, 3000)
+        // some code here
       })
       .catch((error) => {
-        setMessage({
-          body: error.message,
-          class: 'error',
-        })
-        setTimeout(() => {
-          setMessage({
-            body: null,
-            class: null,
-          })
-        }, 3000)
+        // some code here
       }) */
   }
 
@@ -228,7 +187,6 @@ const App = () => {
           <BlogForm
             user={user.name}
             title={newBlog.title}
-            author={newBlog.author}
             url={newBlog.url}
             addBlog={addBlog}
             handleBlogChange={handleBlogChange}
