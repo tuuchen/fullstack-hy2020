@@ -85,7 +85,7 @@ const App = () => {
     }
   }
 
-  const handleLoginInputChange = (e) => {
+  const handleLoginChange = (e) => {
     e.preventDefault()
 
     e.target.name === 'Username'
@@ -99,7 +99,7 @@ const App = () => {
         })
   }
 
-  const handleBlogInputChange = (e) => {
+  const handleBlogChange = (e) => {
     e.preventDefault()
     if (e.target.name === 'Title') {
       setNewBlog({
@@ -117,7 +117,7 @@ const App = () => {
     }
     if (e.target.name === 'URL') {
       setNewBlog({
-        title: newBlog.author,
+        title: newBlog.title,
         author: newBlog.author,
         url: e.target.value,
       })
@@ -219,7 +219,7 @@ const App = () => {
       {user === null ? (
         <LoginForm
           handleLogin={handleLogin}
-          handleLoginInputChange={handleLoginInputChange}
+          handleLoginChange={handleLoginChange}
           username={credentials.username}
           password={credentials.password}
         />
@@ -231,7 +231,7 @@ const App = () => {
             author={newBlog.author}
             url={newBlog.url}
             addBlog={addBlog}
-            handleBlogInputChange={handleBlogInputChange}
+            handleBlogChange={handleBlogChange}
             handleLogout={handleLogout}
           />
           <BlogList blogs={blogs} />
